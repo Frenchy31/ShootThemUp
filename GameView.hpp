@@ -80,11 +80,11 @@ private:
 
 
     /*** MENU ***/
-    sf::String _Tplay;
-    sf::String _Tquit;
+    sf::Text _Tplay;
+    sf::Text _Tquit;
 
-    sf::Image _Background;
-    sf::Image _Boutons;
+    sf::Texture _Background;
+    sf::Texture _Boutons;
 
     sf::Sprite _Sbackground;
     sf::Sprite _SbutonPlay;
@@ -95,21 +95,21 @@ private:
 
     int _backgroundX = 0;
 
-    sf::String _Thealth;
-    sf::String _Tscore;
-    sf::String _Tlevel;
-    sf::String _Tnotif;
-    sf::String _Tdefeat;
-    sf::String _Twon;
-    sf::String _TnextLevel;
+    sf::Text _Thealth;
+    sf::Text _Tscore;
+    sf::Text _Tlevel;
+    sf::Text _Tnotif;
+    sf::Text _Tdefeat;
+    sf::Text _Twon;
+    sf::Text _TnextLevel;
 
-    sf::Image _BackgroundGame;
-    sf::Image _Player;
-    sf::Image _Enemy;
-    sf::Image _Projectile;
-    sf::Image _Bonus;
-    sf::Image _Miniature;
-    sf::Image _Shield;
+    sf::Texture _BackgroundGame;
+    sf::Texture _Player;
+    sf::Texture _Enemy;
+    sf::Texture _Projectile;
+    sf::Texture _Bonus;
+    sf::Texture _Miniature;
+    sf::Texture _Shield;
 
     sf::Sprite _Sshield;
     sf::Sprite _SminiLife;

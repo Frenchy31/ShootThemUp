@@ -199,12 +199,12 @@ void GameModel::enemyShootSuccess()
 //Fonction qui gere les tirs enemis aleatoirement et sans qu'ils ne tirent tous en mem temps
 void GameModel::firingEnemies()
 {
-    if(m_clock.GetElapsedTime() >= 0.3)
+    if(m_clock.getElapsedTime().asSeconds() >= 0.3)
     {
         if(rand()%2 == 1)
             m_level->makeEnemiesShoot();
 
-        m_clock.Reset();
+        m_clock.restart();
     }
 }
 //Fonction gere le moment ou le joueur se fait toucher
