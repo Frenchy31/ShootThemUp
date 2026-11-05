@@ -1,0 +1,5 @@
+cmake-build-*/
+.idea/editor.xml
+.idea/material_theme_project_new.xml
+.idea/inspectionProfiles/
+.mcp.json
