@@ -313,14 +313,11 @@ bool GameView::treatEvents()
         sf::Event event;
         while (_window->pollEvent(event))
         {
-            if(event.type == sf::Event::KeyPressed)
+            if ((event.type == sf::Event::Closed) ||
+                    ((event.type == sf::Event::KeyPressed) && (event.key.code == sf::Keyboard::Escape)))
             {
-                if ((event.type == sf::Event::Closed) ||
-                        ((event.type == sf::Event::KeyPressed) && (event.key.code == sf::Keyboard::Escape)))
-                {
-                    _window->close();
-                    result = false;
-                }
+                _window->close();
+                result = false;
             }
             if(_menu)
                 eventMenu(event,result);
@@ -460,12 +457,7 @@ void GameView::eventGame(sf::Event const&event, bool &result)
 
 bool GameView::mouseCollision(float cursorX, float cursorY, sf::Sprite const&s) const
 {
-    if (cursorX >= s.getPosition().x
-            && cursorX < s.getPosition().y  + s.getGlobalBounds().width
-            && cursorY >= s.getPosition().y && cursorY < s.getPosition().y + s.getGlobalBounds().height)
-        return true;
-    else
-        return false;
+    return s.getGlobalBounds().contains(cursorX, cursorY);
 }
 
 void GameView::setModel(GameModel * model)
