@@ -1,0 +1,71 @@
+# build: every branch and tag. upload + release: only on a vX.Y.Z tag.
+stages: [build, upload, release]
+
+# Branch and tag pipelines only: no duplicate merge request pipeline.
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: never
+    - when: always
+
+variables:
+  ARCHIVE: shootthemup-linux-x86_64.tar.gz
+  PACKAGE_REGISTRY_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/shootthemup/${CI_COMMIT_TAG}"
+
+.release-tag-only:
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/
+
+# The game uses relative asset paths (img/, fonts/): the archive ships them next to the binary,
+# plus the SFML shared libs and a launcher that cd's into its own directory.
+build:
+  stage: build
+  image: debian:bookworm-slim
+  interruptible: true
+  before_script:
+    - apt-get update -qq
+    - apt-get install -y -qq --no-install-recommends g++ libsfml-dev
+  script:
+    - |
+      g++ -O2 -std=gnu++17 -Wl,-rpath,'$ORIGIN/lib' *.cpp \
+        -lsfml-graphics -lsfml-window -lsfml-system -o ShootThemUp
+    - mkdir -p dist/shootthemup/lib
+    - cp ShootThemUp dist/shootthemup/
+    - |
+      ldd ShootThemUp | awk '/libsfml/ {print $3}' | xargs -I{} cp -L {} dist/shootthemup/lib/
+    - cp -r img fonts dist/shootthemup/
+    - |
+      printf '#!/bin/sh\ncd "$(dirname "$0")" && exec ./ShootThemUp\n' > dist/shootthemup/shootthemup.sh
+    - chmod +x dist/shootthemup/shootthemup.sh
+    - tar -C dist -czf "$ARCHIVE" shootthemup
+  artifacts:
+    paths:
+      - $ARCHIVE
+    expire_in: 1 week
+
+upload:
+  extends: .release-tag-only
+  stage: upload
+  image: curlimages/curl:latest
+  needs: [build]
+  script:
+    - |
+      curl --fail-with-body --header "JOB-TOKEN: ${CI_JOB_TOKEN}" \
+        --upload-file "${ARCHIVE}" "${PACKAGE_REGISTRY_URL}/${ARCHIVE}"
+
+release:
+  extends: .release-tag-only
+  stage: release
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  needs: [upload]
+  script:
+    - echo "Releasing ${CI_COMMIT_TAG}"
+  release:
+    tag_name: $CI_COMMIT_TAG
+    name: "ShootThemUp $CI_COMMIT_TAG"
+    description: "ShootThemUp $CI_COMMIT_TAG"
+    assets:
+      links:
+        - name: $ARCHIVE
+          url: "${PACKAGE_REGISTRY_URL}/${ARCHIVE}"
+          link_type: package
